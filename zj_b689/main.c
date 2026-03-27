@@ -1,23 +1,31 @@
-// ZEROJUDGE b589
+// ZEROJUDGE b689
 
 #include <stdio.h>
+#include <stdbool.h>
 
-int main()
+//#define DEBUG
+
+#ifdef DEBUG
+#define dbg(fmt, ...) printf("[%d] " fmt, __LINE__, ##__VA_ARGS__)
+#else
+#define dbg(fmt, ...)
+#endif
+
+#define SZ (25)
+
+bool isEdge(int x, int y, int N, int M)
 {
-    int N, // row
-        M, // columns
-        x, y; /* point coordinate */
+    if (x == 0 || x == M - 1)
+        return true;
+    if (y == 0 || y == N - 1)
+        return true;
 
-    scanf("%d %d", &N, &M);
+    return false;
+}
 
-    char s[N][M];
-
-    for (int i = 0; i < N; ++i)
-    {
-        scanf("%s", s[i]);
-    }
-
-#if 0
+void print(char (*s)[SZ], int N, int M)
+{
+    dbg("Print:\n");
     for (int i = 0; i < N; ++i)
     {
         for (int j = 0; j < M; ++j)
@@ -26,30 +34,70 @@ int main()
         }
         printf("\n");
     }
+}
+
+bool isPath(char (*s)[SZ], int x, int y, int M, int N)
+{
+    if ((1 <= x && x <= M) && (1 <= y && y <= N) && (s[x][y] == '.'))
+        return true;
+
+    return false;
+}
+
+void maze(char (*s)[SZ], int x, int y, int M, int N, int *endX, int *endY)
+{
+    dbg("%d,%d\n", x, y);
+
+    *endX = x;
+    *endY = y;
+    s[x][y] = '#';
+#ifdef DEBUG
+    print(s, M, N);
 #endif
 
-#if 0 /* 無法處理以字元.標示，卻無法到達的格子 */
-    for (int i = 1; i < N - 1; ++i)
-    {
-        for (int j = 1; j < M - 1; ++j)
-        {
-            int sum = 0;
-            sum += (s[i][j - 1] == '.' ? 1 : 0);
-            sum += (s[i][j + 1] == '.' ? 1 : 0);
-            sum += (s[i - 1][j] == '.' ? 1 : 0);
-            sum += (s[i + 1][j] == '.' ? 1 : 0);
+    if (isPath(s, x + 1, y, M, N))
+        maze(s, x + 1, y, M, N, endX, endY);
 
-            if (sum == 1)
+    if (isPath(s, x - 1, y, M, N))
+        maze(s, x - 1, y, M, N, endX, endY);
+
+    if (isPath(s, x, y - 1, M, N))
+        maze(s, x, y - 1, M, N, endX, endY);
+
+    if (isPath(s, x, y + 1, M, N))
+        maze(s, x, y + 1, M, N, endX, endY);
+}
+
+int main()
+{
+    char s[25][25] = {0};
+    int N,    // row
+        M,    // columns
+        x, y; /* point coordinate */
+    int startX, startY, endX, endY;
+
+    scanf("%d %d", &N, &M);
+    // while (getchar() != '\n');
+    for (int i = 0; i < N; ++i)
+    {
+        scanf("%*[\r\n]");
+        for (int j = 0; j < M; ++j)
+        {
+            scanf("%c", &s[i][j]);
+
+            if (s[i][j] == '.' && isEdge(i, j, M, N))
             {
-                x = i;
-                y = j;
+                startX = i;
+                startY = j;
             }
         }
     }
 
-    printf("%d %d", x + 1, y + 1);
+#ifdef DEBUG
+    print(s, N, M);
 #endif
-
-
+    dbg("start: %d %d", startX, startY);
+    maze(s, startX, startY, M, N, &endX, &endY);
+    printf("%d %d", endX + 1, endY + 1);
     return 0;
 }
