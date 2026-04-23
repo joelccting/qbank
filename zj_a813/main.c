@@ -153,7 +153,7 @@ int main()
 #endif
     }
 
-    printf("%d", sum);
+    printf("%lld", sum);
     free(ans);
 
     return 0;
