@@ -3,23 +3,39 @@
 #include <stdio.h>
 #include <string.h>
 
-#define dbg(fmt, ...) printf("[%s] " fmt, __func__, __VA_ARGS__)
-#define LEN (510)
+#define DEBUG
+
+#if defined(DEBUG)
+#define dbg(fmt, ...) printf("[%d] " fmt, __LINE__, ##__VA_ARGS__)
+#else
+#define dbg(fmt, ...)
+#endif
+
+#define LEN (11) //(512)
+
+void init(char *s)
+{
+    int i, len = strlen(s);
+    for (i = len; i < LEN - 1; ++i)
+        s[i] = '0';
+    s[LEN - 1] = 0;
+}
 
 void rev(char *s)
 {
     int len = strlen(s);
-    for (int i = 0; i < len / 2; ++i)
+    dbg("%s\n", s);
+    for (int i = 0; i < (LEN - 2) / 2; ++i)
     {
         char t = s[i];
-        s[i] = s[len - i - 1];
-        s[len - i - 1] = t;
+        s[i] = s[LEN - i - 2];
+        s[LEN - i - 2] = t;
     }
 
     dbg("%s\n", s);
 }
 
-static int adddig(char a, char b, int c, char *res)
+int adddig(char a, char b, int c, char *res)
 {
 
     int da = a - '0';
@@ -60,6 +76,30 @@ void add(char *a, char *b, char *res)
     rev(res);
 }
 
+int subdig(char a, char b, int c, char *res)
+{
+
+    int da = a - '0';
+    int db = b - '0';
+    int r, ret;
+
+    if (da + c >= db)
+    {
+        r = da + c - db;
+        ret = 0;
+    }
+
+    else
+    {
+        r = da + c + 10 - db;
+        ret = -1;
+    }
+
+    *res = r + '0';
+
+    return ret;
+}
+
 void sub(char *a, char *b, char *res)
 {
     int i;
@@ -82,7 +122,7 @@ void sub(char *a, char *b, char *res)
             bb = '0';
 
         if (aa != '0' || bb != '0' || carry != 0)
-            carry = adddig(aa, bb, carry, res + i);
+            carry = subdig(aa, bb, carry, res + i);
     }
     *(res + i) = 0;
     rev(res);
@@ -91,9 +131,11 @@ void sub(char *a, char *b, char *res)
 int main()
 {
     char buf[LEN * 2] = {0}, a[LEN] = {0}, b[LEN] = {0};
-    // fgets(buf, LEN * 2, stdin);
-    // buf[strcspn(buf, "\n")] = 0;
-    gets_s(buf, LEN * 2 - 1);
+
+    fgets(buf, LEN * 2, stdin);
+    buf[strcspn(buf, "\n")] = 0;
+    // gets_s(buf, LEN * 2 - 1);
+
     char *p = strtok(buf, " ");
     int step = 0;
     char op;
@@ -103,7 +145,9 @@ int main()
         switch (step)
         {
         case 0:
+
             strcpy(a, p);
+            init(a);
             step++;
             break;
         case 1:
@@ -112,7 +156,9 @@ int main()
             break;
         case 2:
         default:
+
             strcpy(b, p);
+            init(b);
             break;
         }
 
@@ -125,6 +171,7 @@ int main()
         add(a, b, buf);
         break;
     case '-':
+        sub(a, b, buf);
         break;
     case '*':
         break;
